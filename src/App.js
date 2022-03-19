@@ -56,7 +56,17 @@ const ChildComponent = () => {
 	return (
 		<div>
 			<h1>ChildComponent</h1>
-			<p>{loading ? 'loading...' : data ? JSON.stringify(data) : 'Please try again...'}</p>
+			<p>Click among buttons to switch url and fetch new data</p>
+			<p>
+				{loading
+					? 'loading...'
+					: data
+					? JSON.stringify(data)
+					: 'Please try again...'}
+			</p>
+			<button onClick={() => setPath('https://api.kanye.rest')}>
+				Kanye Quotes
+			</button>
 			<button onClick={() => setPath('https://catfact.ninja/fact')}>
 				Cat facts
 			</button>
@@ -77,8 +87,11 @@ export default function App() {
 
 	return (
 		<div className="App">
-			<h1>Hello CodeSandbox</h1>
-			<h2>Start editing to see some magic happen!</h2>
+			<h1>Hello Savannah tech</h1>
+			<h2>
+				Click toggle to mount or unmount a child component that utilises the
+				useFetch hook
+			</h2>
 			<button onClick={() => setShow((value) => !value)}>Toggle</button>
 			{show && <ChildComponent />}
 		</div>
