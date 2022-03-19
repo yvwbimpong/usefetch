@@ -1,25 +1,86 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const useFetch = (url, fn) => {
+	const controller = new AbortController();
+
+	const [data, setData] = useState(null);
+	const [error, setError] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const [path, setPath] = useState(url);
+
+	const fetchData = useCallback(async () => {
+		try {
+			setLoading(true);
+			const response = await axios.get(path, {
+				signal: controller.signal,
+			});
+			console.log('response', response);
+			setData(response.data);
+			fn?.(response.data);
+			setLoading(false);
+		} catch (error) {
+			console.log('error', error);
+			setLoading(false);
+			setError(error);
+		}
+	}, [path, fn]);
+
+	useEffect(() => {
+		if (path) {
+			fetchData();
+		}
+		return () => {
+			controller.abort();
+		};
+	}, [path]);
+
+	return {
+		data,
+		error,
+		loading,
+		setPath,
+	};
+};
+
+const ChildComponent = () => {
+	const { loading, error, setPath, data } = useFetch(
+		'https://api.kanye.rest',
+		(response) => {
+			console.log(response);
+		}
+	);
+
+	console.log({ loading, error, setPath, data });
+
+	return (
+		<div>
+			<h1>ChildComponent</h1>
+			<p>{loading ? 'loading...' : data ? JSON.stringify(data) : 'Please try again...'}</p>
+			<button onClick={() => setPath('https://catfact.ninja/fact')}>
+				Cat facts
+			</button>
+			<button onClick={() => setPath('https://www.boredapi.com/api/activity')}>
+				What to do
+			</button>
+			<button
+				onClick={() => setPath('https://dog.ceo/api/breeds/image/random')}
+			>
+				Dogs
+			</button>
+		</div>
+	);
+};
+
+export default function App() {
+	const [show, setShow] = useState(false);
+
+	return (
+		<div className="App">
+			<h1>Hello CodeSandbox</h1>
+			<h2>Start editing to see some magic happen!</h2>
+			<button onClick={() => setShow((value) => !value)}>Toggle</button>
+			{show && <ChildComponent />}
+		</div>
+	);
 }
-
-export default App;
